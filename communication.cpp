@@ -22,34 +22,37 @@ void Communication::cleanTokens() {
 	}
 }
 
-unsigned short Communication::crc(const char *data) {
+unsigned short Communication::crc(const char *data, size_t size) {
 	unsigned short crc_modbus = 0xffff;
 	const char *d = data;
 
-	while(*d) {
+	for (unsigned int i=0; i<size; i++) {
+//	while(*d) {
 		crc_modbus = update_crc_16(crc_modbus, *d);
 		d++;
 	}
 	return crc_modbus;
 }
 
-//TODO: gestire crc in lettura
 byte Communication::read() {
 	const char key[] = "pippero         ";
 	char data[BUFFERSIZE];
 	char iv[BLOCK_SIZE + 1];
 	unsigned int buffer_size;
 	int noerr;
+	long crc_value;
 
 	noerr = 0;
 	data[0] = '\0';
 	buffer_size = 0;
 	iv[sizeof(iv) - 1] = 0;
+	cleanTokens();
 	if (Serial.available() > 0) {
 		if (int len = Serial.readBytesUntil(ENDLINE, data, BUFFERSIZE)) {
 			data[len] = 0;
 			buffer_size = atoi(data);
 			if (Serial.readBytes(data, buffer_size) == buffer_size) {
+				crc_value = crc(data, buffer_size);
 				if (Serial.readBytesUntil(ENDLINE, iv, sizeof(iv)) == BLOCK_SIZE) {
 					char dec[buffer_size];
 
@@ -57,10 +60,7 @@ byte Communication::read() {
 						dec[strchr(dec, '.') - dec] = 0;
 						if (int len = Serial.readBytesUntil(ENDLINE, data, BUFFERSIZE)) {
 							data[len] = 0;
-							Serial.print("data="); Serial.println((unsigned short)atol(data));
-							Serial.print("crc="); Serial.println(crc(data));
-							if ((unsigned short)atol(data) == crc(dec)) {
-								cleanTokens();
+							if ((unsigned short)atol(data) == crc_value) {
 								tokenId = 0;
 								for(char* token = strtok(dec, TERM_TOKEN); token != NULL; token = strtok(NULL, TERM_TOKEN)) {
 									strcpy(tokens[tokenId], token);
@@ -78,6 +78,7 @@ byte Communication::read() {
 	return noerr;
 }
 
+//TODO: Change crypto key
 void Communication::write(const char *data) {
 	const char key[] = "pippero         ";
 	char enc[to_alloc((char *)data)];
@@ -91,9 +92,10 @@ void Communication::write(const char *data) {
 
 	Serial.println(iv);
 	Serial.println(sizeof(enc));
-	Serial.println(crc(data));
 
 	encrypt((char *)key, (char *)data, (char *)enc, (char *)iv);
+
+	Serial.println(crc(enc, sizeof(enc)));
 
 	for(unsigned int i=0; i<sizeof(enc); i++) {
 		Serial.write(enc[i]);

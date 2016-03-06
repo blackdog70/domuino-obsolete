@@ -37,7 +37,7 @@ public:
 private:
 	void cleanTokens();
 	byte tokenId;
-	unsigned short crc(const char *);
+	unsigned short crc(const char *, size_t size);
 };
 
 #endif /* COMMUNICATION_H_ */
