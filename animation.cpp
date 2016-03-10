@@ -28,10 +28,6 @@ void Animation::config(Output *out, byte state, byte value) {
 }
 
 void Animation::setValue(byte value) {
-	Serial.print("Set out ");
-	Serial.print(out->pin);
-	Serial.print(" value ");
-	Serial.println(value);
 	Animation::value = value;
 	out->setValue(value);
 }
