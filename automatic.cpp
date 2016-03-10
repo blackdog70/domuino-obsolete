@@ -24,7 +24,6 @@ const char outrange01[] = "";
 const char outrange06[] = "";
 const char outrange0255[] = "";
 
-
 const char msgfmt[] = "{\"T\":%lu,\"C\":\"%s\",\"S\":\"%s\",\"D\":%s}";
 
 Automatic::Automatic() {
@@ -141,48 +140,54 @@ void Automatic::execCommand() {
 		}
 	} else if(!strcmp(COMMAND, "GETS")) {
 		if(strcmp(COMMAND1, "")) {
-			char data[] = "[0,0,0,0,0,0]";
-			int pos = 1;
+			char data[14] = "[";
+			char partial[3];
+			char setpoint;
 
 			if(!strcmp(COMMAND1, "I")) {
 				for(int i=0; i<INPUTS; i++) {
-					data[pos] = inputs[i]->state + '0';
-					pos += 2;
+					sprintf(partial, "%c,", inputs[i]->state + '0');
+					strcat(data, partial);
 				}
+				data[strlen(data)-1] = ']';
 				send(COMMAND, ok, data);
 			} else if(!strcmp(COMMAND1, "O")) {
 				for(int i=0; i<OUTPUTS; i++) {
-					data[pos] = outputs[i]->state + '0';
-					pos += 2;
+					sprintf(partial, "%c,", inputs[i]->state + '0');
+					strcat(data, partial);
 				}
+				data[strlen(data)-1] = ']';
 				send(COMMAND, ok, data);
 			} else {
 				send(COMMAND, err, "");
 			}
+		} else {
+			send(COMMAND, err, "");
 		}
 	} else if(!strcmp(COMMAND, "GETV")) {
 		if(strcmp(COMMAND1, "")) {
-			char data[] = "[000,000,000,000,000,000]";
-			char partial[4];
-			int pos = 1;
+			char data[26] = "[";
+			char partial[5];
 
 			if(!strcmp(COMMAND1, "I")) {
 				for(int i=0; i<INPUTS; i++) {
-					sprintf(partial, "%3u", inputs[i]->value);
-					memcpy(data+pos, partial, 3);
-				   	pos += 4;
+					sprintf(partial, "%3u,", inputs[i]->value);
+					strcat(data, partial);
 				}
+				data[strlen(data)-1] = ']';
 				send(COMMAND, ok, data);
 			} else if(!strcmp(COMMAND1, "O")) {
 				for(int i=0; i<OUTPUTS; i++) {
 					sprintf(partial, "%3u", outputs[i]->value);
-					memcpy(data+pos, partial, 3);
-				   	pos += 4;
+					strcat(data, partial);
 				}
+				data[strlen(data)-1] = ']';
 				send(COMMAND, ok, data);
 			} else {
 				send(COMMAND, err, "");
 			}
+		} else {
+			send(COMMAND, err, "");
 		}
 	} else if (!strcmp(COMMAND, "TIME")) {
 		if(strcmp(COMMAND1, "")) {
@@ -200,9 +205,8 @@ void Automatic::execCommand() {
 			send(COMMAND, err, "");
 		}
 	} else if (!strcmp(COMMAND, "POWER")) {
-		char data[] = "[00000.00,00000.00]";
-		char partial[9];
-		int pos = 1;
+		char data[20] = "[";
+		char partial[10];
 
 		for (int i=0; i<EMONS; i++) {
 			double Irms = emon[i]->calcIrms(1480);  // Calculate Irms only
@@ -216,14 +220,14 @@ void Automatic::execCommand() {
 			int module = (int)power;
 			int remainder = (int)((power - module) * 100);
 
-			sprintf(partial, "%5u.%-2u", module, remainder);
-			memcpy(data+pos, partial, 8);
-		   	pos += 9;
+			sprintf(partial, "%5u.%-2u,", module, remainder);
+			strcat(data, partial);
 		}
+		data[strlen(data)-1] = ']';
 		send(COMMAND, ok, data);
 	} else if (!strcmp(COMMAND, "FREEMEM")) {
 		char data[6];
-		sprintf(data, "%u", freeMemory());
+		sprintf(data, "%4u", freeMemory());
 		send(COMMAND, ok, data);
 	} else {
 		send(COMMAND, err, "");
