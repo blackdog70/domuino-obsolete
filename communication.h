@@ -10,8 +10,8 @@
 
 #include "Arduino.h"
 #include "crypto.h"
-#include "Crc.h"
 #include "FreeMemory.h"
+#include "eeconfig.h"
 
 #define TERM_CMD '.'
 #define TERM_TOKEN "|"
@@ -33,11 +33,6 @@ public:
 
 	byte read();
 	void write(const char *);
-
-private:
-	void cleanTokens();
-	byte tokenId;
-	unsigned short crc(const char *, size_t size);
 };
 
 #endif /* COMMUNICATION_H_ */

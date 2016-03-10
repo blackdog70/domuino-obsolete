@@ -37,3 +37,15 @@ byte decrypt(char *key, char *crypto, char *text, char *iv, int buffer_size) {
 
 	return succ;
 }
+
+unsigned short crc(const char *data, size_t size) {
+	unsigned short crc_modbus = 0xffff;
+	const char *d = data;
+
+	for (unsigned int i=0; i<size; i++) {
+//	while(*d) {
+		crc_modbus = update_crc_16(crc_modbus, *d);
+		d++;
+	}
+	return crc_modbus;
+}

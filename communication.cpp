@@ -7,35 +7,17 @@
 
 #include "communication.h"
 
+//const char key[] = "pippero         ";
+
+
 Communication::Communication() {
-	tokenId = 0;
-	cleanTokens();
 }
 
 Communication::~Communication() {
 	// TODO Auto-generated destructor stub
 }
 
-void Communication::cleanTokens() {
-	for(int i=0; i<MAXTOKENS; i++) {
-		strcpy(tokens[i], "");
-	}
-}
-
-unsigned short Communication::crc(const char *data, size_t size) {
-	unsigned short crc_modbus = 0xffff;
-	const char *d = data;
-
-	for (unsigned int i=0; i<size; i++) {
-//	while(*d) {
-		crc_modbus = update_crc_16(crc_modbus, *d);
-		d++;
-	}
-	return crc_modbus;
-}
-
 byte Communication::read() {
-	const char key[] = "pippero         ";
 	char data[BUFFERSIZE];
 	char iv[BLOCK_SIZE + 1];
 	unsigned int buffer_size;
@@ -46,22 +28,22 @@ byte Communication::read() {
 	data[0] = '\0';
 	buffer_size = 0;
 	iv[sizeof(iv) - 1] = 0;
-	cleanTokens();
+	memset(tokens, 0, sizeof(tokens));
 	if (Serial.available() > 0) {
 		if (int len = Serial.readBytesUntil(ENDLINE, data, BUFFERSIZE)) {
-			data[len] = 0;
+			data[len] = '\0';
 			buffer_size = atoi(data);
 			if (Serial.readBytes(data, buffer_size) == buffer_size) {
 				crc_value = crc(data, buffer_size);
 				if (Serial.readBytesUntil(ENDLINE, iv, sizeof(iv)) == BLOCK_SIZE) {
 					char dec[buffer_size];
 
-					if (decrypt((char *)key, (char *)data, (char *)dec, (char *)iv, buffer_size) == 0) {
-						dec[strchr(dec, '.') - dec] = 0;
+					if (decrypt((char *)eeconfig.password, (char *)data, (char *)dec, (char *)iv, buffer_size) == 0) {
+						dec[strchr(dec, '.') - dec] = '\0';
 						if (int len = Serial.readBytesUntil(ENDLINE, data, BUFFERSIZE)) {
-							data[len] = 0;
+							data[len] = '\0';
 							if ((unsigned short)atol(data) == crc_value) {
-								tokenId = 0;
+								int tokenId = 0;
 								for(char* token = strtok(dec, TERM_TOKEN); token != NULL; token = strtok(NULL, TERM_TOKEN)) {
 									strcpy(tokens[tokenId], token);
 									tokenId++;
@@ -80,7 +62,6 @@ byte Communication::read() {
 
 //TODO: Change crypto key
 void Communication::write(const char *data) {
-	const char key[] = "pippero         ";
 	char enc[to_alloc((char *)data)];
 	char iv[17];
 
@@ -93,12 +74,13 @@ void Communication::write(const char *data) {
 	Serial.println(iv);
 	Serial.println(sizeof(enc));
 
-	encrypt((char *)key, (char *)data, (char *)enc, (char *)iv);
+	encrypt((char *)eeconfig.password, (char *)data, (char *)enc, (char *)iv);
 
 	Serial.println(crc(enc, sizeof(enc)));
 
 	for(unsigned int i=0; i<sizeof(enc); i++) {
 		Serial.write(enc[i]);
 	}
+
 	Serial.flush();
 }

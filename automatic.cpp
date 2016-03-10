@@ -7,6 +7,26 @@
 
 #include "automatic.h"
 
+const char firstrun[] = "\"First run.\"\0";
+//#define FIRSTRUN strcpy_P( buffer, pgm_read_word( &(firstrun) ) );
+
+const char err[] = "ERR\0";
+const char ok[] = "OK\0";
+const char null[] = "null\0";
+
+//const char crcerror[] = "\"EEProm CRC error. Firmware defaults used.\"\0";
+//const char outrange01[] = "\"Value out of range 0..1\"\0";
+//const char outrange06[] = "\"Id out of range 0..6\"\0";
+//const char outrange0255[] = "\"Value out of range 0..255\"\0";
+
+const char crcerror[] = "";
+const char outrange01[] = "";
+const char outrange06[] = "";
+const char outrange0255[] = "";
+
+
+const char msgfmt[] = "{\"T\":%lu,\"C\":\"%s\",\"S\":\"%s\",\"D\":%s}";
+
 Automatic::Automatic() {
 	for(int i=0; i<OUTPUTS; i++) {
 		outputs[i] = new Output();
@@ -18,32 +38,30 @@ Automatic::Automatic() {
 		emon[i] = new EnergyMonitor();
 	}
 	communication = new Communication();
-	config();
+	switch (get_config()) {
+		case 1:
+			send("INIT", ok, firstrun);
+			break;
+		case 2:
+			send("INIT", err, crcerror);
+			break;
+		default:
+			send("INIT", ok, "");
+			break;
+	};
+	for (int i=0; i<OUTPUTS; i++) {
+		outputs[i]->config(4+i, eeconfig.outputs[i].mode, eeconfig.outputs[i].state, eeconfig.outputs[i].value);
+	}
+	for (int i=0; i<INPUTS; i++) {
+		inputs[i]->config(14+i, eeconfig.inputs[i].mode, eeconfig.inputs[i].state, eeconfig.inputs[i].value, outputs[eeconfig.io_relation[i]]);
+	}
+	for (int i=0; i<EMONS; i++) {
+		emon[i]->current((unsigned int) A6+i, eeconfig.emon_calib[i]);
+	}
 }
 
 Automatic::~Automatic() {
 	// TODO Auto-generated destructor stub
-}
-
-void Automatic::config() {
-	outputs[0]->config(4, DIMMABLE, LOW, 0);
-	outputs[1]->config(5, DIGITAL, LOW, 0);
-	outputs[2]->config(6, DIGITAL, LOW, 0);
-	outputs[3]->config(7, DIGITAL, LOW, 0);
-	outputs[4]->config(8, DIGITAL, LOW, 0);
-	outputs[5]->config(9, DIGITAL, LOW, 0);
-	inputs[0]->config(14, DIGITAL, LOW, 0, outputs[0]);
-	inputs[1]->config(15, DIGITAL, LOW, 0, outputs[1]);
-	inputs[2]->config(16, DIGITAL, LOW, 0, outputs[2]);
-	inputs[3]->config(17, DIGITAL, LOW, 0, outputs[3]);
-	inputs[4]->config(18, DIGITAL, LOW, 0, outputs[4]);
-	inputs[5]->config(19, DIGITAL, LOW, 0, outputs[5]);
-	//inputs[6]->config(A6, ANALOG, LOW, 0, NULL);
-	//inputs[7]->config(A7, ANALOG, LOW, 0, NULL);
-	//pinMode(A6, INPUT);
-	//pinMode(A7, INPUT);
-	emon[0]->current(A6, 20.73);       // Current: input pin, calibration.
-	emon[1]->current(A7, 20.73);       // Current: input pin, calibration.
 }
 
 void Automatic::on() {
@@ -57,10 +75,6 @@ void Automatic::on() {
 	digitalWrite(10, HIGH); // Set CPU pin ON
 }
 
-void Automatic::show() {
-	send("SHOW", "ALIVE", "");
-}
-
 void Automatic::refresh() {
 	for(int i=0; i<INPUTS; i++) {
 		inputs[i]->refresh();
@@ -71,13 +85,12 @@ void Automatic::refresh() {
 void Automatic::send(const char *command, const char *status, const char *data) {
 	char msg[MSGLEN];
 	char *d;
-	const char null[] = "null\0";
 
 	if (strcmp(data, "") == 0)
 		d = (char *)null;
 	else
 		d = (char *)data;
-	sprintf(msg, "{\"T\":%lu,\"C\":\"%s\",\"S\":\"%s\",\"D\":%s}", (unsigned long)now(), command, status, d);
+	sprintf(msg, msgfmt, (unsigned long)now(), command, status, d);
 	communication->write(msg);
 }
 
@@ -85,9 +98,6 @@ void Automatic::execCommand() {
 	#define COMMAND (char *)communication->tokens[0]
 	#define COMMAND1 (char *)communication->tokens[1]
 	#define COMMAND2 (char *)communication->tokens[2]
-
-	const char* err = "ERR";
-	const char* ok = "OK";
 
 	if (!communication->read()) {
 		return;
@@ -104,10 +114,10 @@ void Automatic::execCommand() {
 					outputs[id]->set();
 					send(COMMAND, ok, "");
 				} else {
-					send(COMMAND, err, "\"Value out of range 0..1\"");
+					send(COMMAND, err, outrange01);
 				}
 			} else {
-				send(COMMAND, err, "\"Id out of range 0..6\"");
+				send(COMMAND, err, outrange06);
 			}
 		} else {
 			send(COMMAND, err, "");
@@ -121,10 +131,10 @@ void Automatic::execCommand() {
 					outputs[id]->value = value;
 					send(COMMAND, ok, "");
 				} else {
-					send(COMMAND, err, "\"Value out of range 0..255\"");
+					send(COMMAND, err, outrange0255);
 				}
 			} else {
-				send(COMMAND, err, "\"Id out of range 0..6\"");
+				send(COMMAND, err, outrange06);
 			}
 		} else {
 			send(COMMAND, err, "");

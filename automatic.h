@@ -16,8 +16,8 @@
 #include "communication.h"
 #include "EmonLib.h"                   // Include Emon Library
 #include "errno.h"
-
-#define EMONS 2
+#include "eeconfig.h"
+#include "avr/pgmspace.h"
 
 class Automatic {
 public:
@@ -28,12 +28,14 @@ public:
 	Automatic();
 	virtual ~Automatic();
 
-	void config();
 	void on();
-	void show();
 	void refresh();
+//	void get_config();
+//	void store_config();
+//	void firmware_config();
 
 private:
+//	char first_run();
 	void onCommand();
 	void offCommand();
 	void setCommand();

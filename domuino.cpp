@@ -22,8 +22,6 @@ void setup() {
 
 // the loop function runs over and over again forever
 void loop() {
-//	pstate();
-
 	automatic->refresh();
 	blink_13();
 
@@ -33,21 +31,8 @@ void loop() {
 void config() {
 	automatic = new Automatic();
 	automatic->on();
-	automatic->show();
 	outputs = automatic->outputs;
 	inputs = automatic->inputs;
-}
-
-void pstate() {
-	Serial.println("-----------");
-	Serial.println("INPUTS");
-	Serial.println("-----------");
-	Serial.println("1 2 3 4 5 6");
-	for(int i=0; i<INPUTS; i++) {
-		Serial.print(inputs[i]->state);
-		Serial.print(" ");
-	}
-	Serial.println();
 }
 
 void zero_cross() {
