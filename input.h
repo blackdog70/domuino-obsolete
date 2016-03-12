@@ -11,20 +11,19 @@
 #include "Arduino.h"
 #include "output.h"
 
-#define INPUTS 6
 #define DIGITAL 0
 #define ANALOG 1
 
 class Input {
 public:
-	char pin;
-	char mode;    	// 0: on/off 1: dimmable
-	char state;   	// LOW: OFF HIGH: ON
-	char value;   	// 0-255: value for dimmable lamp
+	unsigned char pin;
+	unsigned char mode;    	// 0: on/off 1: dimmable
+	unsigned char state;   	// LOW: OFF HIGH: ON
+	unsigned char value;   	// 0-255: value for dimmable lamp
 	Output* output;
 
 	Input();
-	void config(char pin, char mode, char state, char value, Output* output);
+	void config(unsigned char pin, unsigned char mode, unsigned char state, unsigned char value, Output* output);
 	void get();
 	void refresh();
 
@@ -32,9 +31,9 @@ private:
 	unsigned long lastDebounce;
 	unsigned long debounceDelay; // ms
 
-	char prev_state;
-	char prev_input;
-	char toggle;
+	unsigned char prev_state;
+	unsigned char prev_input;
+	unsigned char toggle;
 	char debounceRead();
 };
 

@@ -21,8 +21,8 @@
 
 class Automatic {
 public:
-	Output* outputs[OUTPUTS];
-	Input* inputs[INPUTS];
+	Output* outputs[PINS];
+	Input* inputs[PINS];
 	EnergyMonitor* emon[EMONS];       // Create an instance
 
 	Automatic();

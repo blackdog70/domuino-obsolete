@@ -35,12 +35,11 @@ char get_config() {
 void firmware_config() {
 	eeconfig.domuino_id = 0;
 	strcpy(eeconfig.password, "GloriaErikaSeba ");
-	for (int i=0; i<OUTPUTS; i++) {
+	for (int i=0; i<PINS; i++) {
 		eeconfig.outputs[i].mode = DIGITAL;
 		eeconfig.outputs[i].state = LOW;
 		eeconfig.outputs[i].value = 0;
-	}
-	for (int i=0; i<INPUTS; i++) {
+
 		eeconfig.inputs[i].mode = DIGITAL;
 		eeconfig.inputs[i].state = LOW;
 		eeconfig.inputs[i].value = 0;

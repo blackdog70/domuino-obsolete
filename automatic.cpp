@@ -15,22 +15,22 @@ const char ok[] = "OK\0";
 const char null[] = "null\0";
 
 //const char crcerror[] = "\"EEProm CRC error. Firmware defaults used.\"\0";
-//const char outrange01[] = "\"Value out of range 0..1\"\0";
-//const char outrange06[] = "\"Id out of range 0..6\"\0";
-//const char outrange0255[] = "\"Value out of range 0..255\"\0";
+const char outrange01[] = "\"Value out of range 0..1\"\0";
+const char outrange06[] = "\"Id out of range 0..6\"\0";
+const char outrange0255[] = "\"Value out of range 0..255\"\0";
 
 const char crcerror[] = "";
-const char outrange01[] = "";
-const char outrange06[] = "";
-const char outrange0255[] = "";
+//const char outrange01[] = "";
+//const char outrange06[] = "";
+//const char outrange0255[] = "";
 
 const char msgfmt[] = "{\"T\":%lu,\"C\":\"%s\",\"S\":\"%s\",\"D\":%s}";
 
 Automatic::Automatic() {
-	for(int i=0; i<OUTPUTS; i++) {
+	for(int i=0; i<PINS; i++) {
 		outputs[i] = new Output();
 	};
-	for(int i=0; i<INPUTS; i++) {
+	for(int i=0; i<PINS; i++) {
 		inputs[i] = new Input();
 	};
 	for(int i=0; i<EMONS; i++) {
@@ -48,10 +48,10 @@ Automatic::Automatic() {
 			send("INIT", ok, "");
 			break;
 	};
-	for (int i=0; i<OUTPUTS; i++) {
+	for (int i=0; i<PINS; i++) {
 		outputs[i]->config(4+i, eeconfig.outputs[i].mode, eeconfig.outputs[i].state, eeconfig.outputs[i].value);
 	}
-	for (int i=0; i<INPUTS; i++) {
+	for (int i=0; i<PINS; i++) {
 		inputs[i]->config(14+i, eeconfig.inputs[i].mode, eeconfig.inputs[i].state, eeconfig.inputs[i].value, outputs[eeconfig.io_relation[i]]);
 	}
 	for (int i=0; i<EMONS; i++) {
@@ -64,10 +64,10 @@ Automatic::~Automatic() {
 }
 
 void Automatic::on() {
-	for(int i=0; i<OUTPUTS; i++) {
+	for(int i=0; i<PINS; i++) {
 		pinMode(outputs[i]->pin, OUTPUT);
 	}
-	for(int i=0; i<INPUTS; i++) {
+	for(int i=0; i<PINS; i++) {
 		pinMode(inputs[i]->pin, INPUT);
 	}
 	pinMode(10, OUTPUT);    // CPU pin
@@ -75,7 +75,7 @@ void Automatic::on() {
 }
 
 void Automatic::refresh() {
-	for(int i=0; i<INPUTS; i++) {
+	for(int i=0; i<PINS; i++) {
 		inputs[i]->refresh();
 	}
 	execCommand();
@@ -102,85 +102,69 @@ void Automatic::execCommand() {
 		return;
 	}
 
-	if(!strcmp(COMMAND, "SET")) {
+	if(!strncmp(COMMAND, "SET", 3)) {
 		if(strcmp(COMMAND1, "") && strcmp(COMMAND2, "")) {
-			if(strcmp(COMMAND1, "0") >= 0 && strcmp(COMMAND1, "6") <= 0) {
-				byte id = atoi(COMMAND1);
-				if(!strcmp(COMMAND2, "0")) {
-					outputs[id]->reset();
-					send(COMMAND, ok, "");
-				} else if (!strcmp(COMMAND2, "1")) {
-					outputs[id]->set();
-					send(COMMAND, ok, "");
-				} else {
-					send(COMMAND, err, outrange01);
-				}
-			} else {
-				send(COMMAND, err, outrange06);
-			}
-		} else {
-			send(COMMAND, err, "");
-		}
-	} else if(!strcmp(COMMAND, "DIMMER")) {
-		if(strcmp(COMMAND1, "") && strcmp(COMMAND2, "")) {
-			if(strcmp(COMMAND1, "0") >= 0 && strcmp(COMMAND1, "6") <= 0) {
-				byte id = atoi(COMMAND1);
-				if(strcmp(COMMAND2, "000") >= 0 && strcmp(COMMAND2, "255") <= 0) {
-					byte value = atoi(COMMAND2);
-					outputs[id]->value = value;
-					send(COMMAND, ok, "");
-				} else {
-					send(COMMAND, err, outrange0255);
-				}
-			} else {
-				send(COMMAND, err, outrange06);
-			}
-		} else {
-			send(COMMAND, err, "");
-		}
-	} else if(!strcmp(COMMAND, "GETS")) {
-		if(strcmp(COMMAND1, "")) {
-			char data[14] = "[";
-			char partial[3];
-			char setpoint;
+			int id = atoi(COMMAND1);
+			if((id >= 0) && (id <= 6)) {
+				if(!strcmp(COMMAND+3, "P")) {
+					int value = atoi(COMMAND2);
 
-			if(!strcmp(COMMAND1, "I")) {
-				for(int i=0; i<INPUTS; i++) {
-					sprintf(partial, "%c,", inputs[i]->state + '0');
-					strcat(data, partial);
+					switch(atoi(COMMAND2)) {
+					case 0:
+						outputs[id]->reset();
+						break;
+					case 1:
+						outputs[id]->set();
+						break;
+					}
+					if(value >=0 and value <= 1) {
+						send(COMMAND, ok, "");
+					} else {
+						send(COMMAND, err, outrange01);
+					}
+				} else if (!strcmp(COMMAND+3, "V")) {
+					int value = atoi(COMMAND2);
+					if((value >= 0) && (value <= 255)) {
+						outputs[id]->value = value;
+						send(COMMAND, ok, "");
+					} else {
+						send(COMMAND, err, outrange0255);
+					}
+				} else {
+					send(COMMAND, err, "");
 				}
-				data[strlen(data)-1] = ']';
-				send(COMMAND, ok, data);
-			} else if(!strcmp(COMMAND1, "O")) {
-				for(int i=0; i<OUTPUTS; i++) {
-					sprintf(partial, "%c,", inputs[i]->state + '0');
-					strcat(data, partial);
-				}
-				data[strlen(data)-1] = ']';
-				send(COMMAND, ok, data);
 			} else {
-				send(COMMAND, err, "");
+				send(COMMAND, err, outrange06);
 			}
 		} else {
 			send(COMMAND, err, "");
 		}
-	} else if(!strcmp(COMMAND, "GETV")) {
+	} else if(!strncmp(COMMAND, "GET", 3)) {
 		if(strcmp(COMMAND1, "")) {
 			char data[26] = "[";
-			char partial[5];
+			char partial[3] = "";
+			unsigned char value = 0;
 
-			if(!strcmp(COMMAND1, "I")) {
-				for(int i=0; i<INPUTS; i++) {
-					sprintf(partial, "%3u,", inputs[i]->value);
-					strcat(data, partial);
+			for(int i=0; i<PINS; i++) {
+				if(!strcmp(COMMAND+3, "S")) {			//GETS
+					if(!strcmp(COMMAND1, "I")) {
+						value = inputs[i]->state;
+					} else if (!strcmp(COMMAND1, "O")) {
+						value = outputs[i]->state;
+					}
+				} else if (!strcmp(COMMAND+3, "V")) {	//GETV
+					if(!strcmp(COMMAND1, "I")) {
+						value = inputs[i]->value;
+					} else if (!strcmp(COMMAND1, "O")) {
+						value = outputs[i]->value;
+					}
+				} else {
+					break;
 				}
-				data[strlen(data)-1] = ']';
-				send(COMMAND, ok, data);
-			} else if(!strcmp(COMMAND1, "O")) {
-				for(int i=0; i<OUTPUTS; i++) {
-					sprintf(partial, "%3u", outputs[i]->value);
-					strcat(data, partial);
-				}
+				sprintf(partial, "%3i,", value);
+				strcat(data, partial);
+			}
+			if(strcmp(data, "") != 0) {
 				data[strlen(data)-1] = ']';
 				send(COMMAND, ok, data);
 			} else {

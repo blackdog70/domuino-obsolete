@@ -20,7 +20,7 @@ Input::Input() {
 	debounceDelay = 50; //ms
 }
 
-void Input::config(char pin, char mode, char state, char value, Output* output) {
+void Input::config(unsigned char pin, unsigned char mode, unsigned char state, unsigned char value, Output* output) {
 	Input::pin = pin;
 	Input::mode = mode;
 	Input::state = state;

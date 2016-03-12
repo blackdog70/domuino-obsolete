@@ -43,12 +43,12 @@ void zero_cross() {
 void timer_clk() {
 	if(dimmer_step<127)
 		dimmer_step++;
-	for(int i=0; i<OUTPUTS; i++) {
+	for(int i=0; i<PINS; i++) {
 		if(outputs[i]->mode == DIMMABLE && outputs[i]->state == HIGH && dimmer_step == 127 - outputs[i]->value) {
 			digitalWrite(outputs[i]->pin, HIGH);
 		}
 	}
-	for(int i=0; i<OUTPUTS; i++) {
+	for(int i=0; i<PINS; i++) {
 		if(outputs[i]->mode == DIMMABLE && dimmer_step == 127 - outputs[i]->value) {
 			digitalWrite(outputs[i]->pin, LOW);
 		}

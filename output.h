@@ -10,20 +10,18 @@
 
 #include "Arduino.h"
 
-#define OUTPUTS 6
-
 #define DIGITAL 0
 #define DIMMABLE 1
 
 class Output {
 public:
-	char pin;
-	char mode;    	// 0: on/off 1: dimmable
-	char state;   	// LOW: OFF HIGH: ON
-	char value;   	// 0-255: value for dimmable lamp
+	unsigned char pin;
+	unsigned char mode;    			// 0: on/off 1: dimmable
+	unsigned char state;   	// LOW: OFF HIGH: ON
+	unsigned char value;   			// 0-255: value for dimmable lamp
 
 	Output();
-	void config(char pin, char mode, char state, char value);
+	void config(unsigned char pin, unsigned char mode, unsigned char state, unsigned char value);
 	void set();
 	void reset();
 	void setValue(char value);

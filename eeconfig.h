@@ -13,21 +13,22 @@
 #include "EEPROM.h"
 
 //TODO: Put here all the constants
+#define PINS 6
 #define EMONS 2
 
 struct Pin {
-	char mode;
-	char state;
-	char value;
+	unsigned char mode;
+	unsigned char state;
+	unsigned char value;
 };
 
 struct Config {
 	long eeprom_write_counter;
 	char domuino_id;
 	char password[BLOCK_SIZE+1];
-	Pin inputs[INPUTS];
-	Pin outputs[OUTPUTS];
-	int io_relation[INPUTS];
+	Pin inputs[PINS];
+	Pin outputs[PINS];
+	int io_relation[PINS];
 	double emon_calib[EMONS];
 };
 
