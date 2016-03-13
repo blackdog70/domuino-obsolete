@@ -34,9 +34,9 @@ struct Config {
 
 extern Config eeconfig;
 
-char first_run();
-void store_config();
-void firmware_config();
-char get_config();
+char first_run(Config*);
+void store_config(Config&);
+void firmware_config(Config*);
+char get_config(Config&);
 
 #endif /* EECONFIG_H_ */

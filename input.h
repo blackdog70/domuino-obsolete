@@ -20,12 +20,16 @@ public:
 	unsigned char mode;    	// 0: on/off 1: dimmable
 	unsigned char state;   	// LOW: OFF HIGH: ON
 	unsigned char value;   	// 0-255: value for dimmable lamp
-	Output* output;
 
+	/*
+	 * Read all inputs and save state.
+	 * The state can be ON or OFF, the input is debounced.
+	 * The input can be digital or analog.
+	 * With analog input the state change to ON every time the value is changed, then value is saved.
+	 */
 	Input();
-	void config(unsigned char pin, unsigned char mode, unsigned char state, unsigned char value, Output* output);
-	void get();
-	void refresh();
+	void config(unsigned char, unsigned char, unsigned char, unsigned char);
+	int get();
 
 private:
 	unsigned long lastDebounce;

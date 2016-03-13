@@ -7,67 +7,84 @@
 
 #include "automatic.h"
 
-const char firstrun[] = "\"First run.\"\0";
+const char firstrun[] = "\"First run\"\0";
 //#define FIRSTRUN strcpy_P( buffer, pgm_read_word( &(firstrun) ) );
 
 const char err[] = "ERR\0";
 const char ok[] = "OK\0";
 const char null[] = "null\0";
 
-//const char crcerror[] = "\"EEProm CRC error. Firmware defaults used.\"\0";
-const char outrange01[] = "\"Value out of range 0..1\"\0";
-const char outrange06[] = "\"Id out of range 0..6\"\0";
-const char outrange0255[] = "\"Value out of range 0..255\"\0";
-
-const char crcerror[] = "";
-//const char outrange01[] = "";
-//const char outrange06[] = "";
-//const char outrange0255[] = "";
+const char crcerror[] = "\"CRC\"\0";
+const char outrange01[] = "\"0..1\"\0";
+const char outrange06[] = "\"0..6\"\0";
+const char outrange0255[] = "\"0..255\"\0";
 
 const char msgfmt[] = "{\"T\":%lu,\"C\":\"%s\",\"S\":\"%s\",\"D\":%s}";
 
 Automatic::Automatic() {
 	for(int i=0; i<PINS; i++) {
 		outputs[i] = new Output();
-	};
-	for(int i=0; i<PINS; i++) {
 		inputs[i] = new Input();
 	};
 	for(int i=0; i<EMONS; i++) {
 		emon[i] = new EnergyMonitor();
 	}
 	communication = new Communication();
-	switch (get_config()) {
-		case 1:
-			send("INIT", ok, firstrun);
-			break;
-		case 2:
-			send("INIT", err, crcerror);
-			break;
-		default:
-			send("INIT", ok, "");
-			break;
-	};
-	for (int i=0; i<PINS; i++) {
-		outputs[i]->config(4+i, eeconfig.outputs[i].mode, eeconfig.outputs[i].state, eeconfig.outputs[i].value);
-	}
-	for (int i=0; i<PINS; i++) {
-		inputs[i]->config(14+i, eeconfig.inputs[i].mode, eeconfig.inputs[i].state, eeconfig.inputs[i].value, outputs[eeconfig.io_relation[i]]);
-	}
-	for (int i=0; i<EMONS; i++) {
-		emon[i]->current((unsigned int) A6+i, eeconfig.emon_calib[i]);
-	}
+	load_config();
 }
 
 Automatic::~Automatic() {
 	// TODO Auto-generated destructor stub
 }
 
+void Automatic::load_config() {
+	Config eeconfig;
+	char data[15] = "";
+
+	switch (get_config(eeconfig)) {
+		case 1:
+			strcpy(data, firstrun);
+			break;
+		case 2:
+			strcpy(data, crcerror);
+			break;
+	};
+	send("INIT", ok, data);
+	for (int i=0; i<PINS; i++) {
+		outputs[i]->config(4+i, eeconfig.outputs[i].mode, eeconfig.outputs[i].state, eeconfig.outputs[i].value);
+		inputs[i]->config(14+i, eeconfig.inputs[i].mode, eeconfig.inputs[i].state, eeconfig.inputs[i].value);
+	}
+	for (int i=0; i<EMONS; i++) {
+		emon[i]->current((unsigned int) A6+i, eeconfig.emon_calib[i]);
+	}
+
+	strcpy(password, eeconfig.password);
+}
+
+void Automatic::save_config() {
+	Config eeconfig;
+
+	eeconfig.domuino_id = domuino_id;
+	for (int i=0; i<PINS; i++) {
+		eeconfig.outputs[i].mode = outputs[i]->mode;
+		eeconfig.outputs[i].state = outputs[i]->state;
+		eeconfig.outputs[i].value = outputs[i]->value;
+
+		eeconfig.inputs[i].mode = inputs[i]->mode;
+		eeconfig.inputs[i].state = inputs[i]->state;
+		eeconfig.inputs[i].value = inputs[i]->value;
+
+		eeconfig.io_relation[i] = i;
+	}
+	for (int i=0; i<EMONS; i++) {
+		eeconfig.emon_calib[i] = 20.73;
+	}
+	store_config(eeconfig);
+}
+
 void Automatic::on() {
 	for(int i=0; i<PINS; i++) {
 		pinMode(outputs[i]->pin, OUTPUT);
-	}
-	for(int i=0; i<PINS; i++) {
 		pinMode(inputs[i]->pin, INPUT);
 	}
 	pinMode(10, OUTPUT);    // CPU pin
@@ -76,7 +93,7 @@ void Automatic::on() {
 
 void Automatic::refresh() {
 	for(int i=0; i<PINS; i++) {
-		inputs[i]->refresh();
+		inputs[i]->get();
 	}
 	execCommand();
 }
@@ -90,7 +107,7 @@ void Automatic::send(const char *command, const char *status, const char *data) 
 	else
 		d = (char *)data;
 	sprintf(msg, msgfmt, (unsigned long)now(), command, status, d);
-	communication->write(msg);
+	communication->write(password, msg);
 }
 
 void Automatic::execCommand() {
@@ -98,7 +115,7 @@ void Automatic::execCommand() {
 	#define COMMAND1 (char *)communication->tokens[1]
 	#define COMMAND2 (char *)communication->tokens[2]
 
-	if (!communication->read()) {
+	if (!communication->read(password)) {
 		return;
 	}
 
@@ -146,7 +163,7 @@ void Automatic::execCommand() {
 			unsigned char value = 0;
 
 			for(int i=0; i<PINS; i++) {
-				if(!strcmp(COMMAND+3, "S")) {			//GETS
+				if(!strcmp(COMMAND+3, "P")) {			//GETP
 					if(!strcmp(COMMAND1, "I")) {
 						value = inputs[i]->state;
 					} else if (!strcmp(COMMAND1, "O")) {
@@ -164,7 +181,7 @@ void Automatic::execCommand() {
 				sprintf(partial, "%3i,", value);
 				strcat(data, partial);
 			}
-			if(strcmp(data, "") != 0) {
+			if(strcmp(data, "[") != 0) {
 				data[strlen(data)-1] = ']';
 				send(COMMAND, ok, data);
 			} else {

@@ -17,7 +17,7 @@ Communication::~Communication() {
 	// TODO Auto-generated destructor stub
 }
 
-byte Communication::read() {
+byte Communication::read(const char* password) {
 	char data[BUFFERSIZE];
 	char iv[BLOCK_SIZE + 1];
 	unsigned int buffer_size;
@@ -38,7 +38,7 @@ byte Communication::read() {
 				if (Serial.readBytesUntil(ENDLINE, iv, sizeof(iv)) == BLOCK_SIZE) {
 					char dec[buffer_size];
 
-					if (decrypt((char *)eeconfig.password, (char *)data, (char *)dec, (char *)iv, buffer_size) == 0) {
+					if (decrypt((char *)password, (char *)data, (char *)dec, (char *)iv, buffer_size) == 0) {
 						dec[strchr(dec, '.') - dec] = '\0';
 						if (int len = Serial.readBytesUntil(ENDLINE, data, BUFFERSIZE)) {
 							data[len] = '\0';
@@ -61,7 +61,7 @@ byte Communication::read() {
 }
 
 //TODO: Change crypto key
-void Communication::write(const char *data) {
+void Communication::write(const char *password,const char *data) {
 	char enc[to_alloc((char *)data)];
 	char iv[17];
 
@@ -74,7 +74,7 @@ void Communication::write(const char *data) {
 	Serial.println(iv);
 	Serial.println(sizeof(enc));
 
-	encrypt((char *)eeconfig.password, (char *)data, (char *)enc, (char *)iv);
+	encrypt((char *)password, (char *)data, (char *)enc, (char *)iv);
 
 	Serial.println(crc(enc, sizeof(enc)));
 

@@ -15,9 +15,6 @@ OnOff::~OnOff() {
 	// TODO Auto-generated destructor stub
 }
 
-void OnOff::refresh() {
-}
-
 void OnOff::start() {
 	if(out != NULL) {
 		out->value = value;

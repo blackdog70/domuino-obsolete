@@ -15,9 +15,8 @@ public:
 	OnOff();
 	virtual ~OnOff();
 
-	void refresh();
-	void start();
-	void stop();
+	virtual void start();
+	virtual void stop();
 };
 
 #endif /* ONOFF_H_ */

@@ -7,50 +7,48 @@
 
 #include "eeconfig.h"
 
-Config eeconfig;
-
 const char start[] = "Start";
 unsigned short eeprom_crc;
 
-char get_config() {
+char get_config(Config &eeconfig) {
 	char err = 0;
 
-	if (first_run()) {
-		firmware_config();
-		store_config();
+	if (first_run(&eeconfig)) {
+		firmware_config(&eeconfig);
+		store_config(eeconfig);
 		err = 1;
 	} else {
 		EEPROM.get(6, eeprom_crc);
 		EEPROM.get(6 + sizeof(unsigned short), eeconfig);
 
 		if (eeprom_crc != crc((const char*)&eeconfig, sizeof(eeconfig))) {
-			firmware_config();
-			store_config();
+			firmware_config(&eeconfig);
+			store_config(eeconfig);
 			err = 2;
 		}
 	}
 	return err;
 }
 
-void firmware_config() {
-	eeconfig.domuino_id = 0;
-	strcpy(eeconfig.password, "GloriaErikaSeba ");
+void firmware_config(Config* eeconfig) {
+	eeconfig->domuino_id = 0;
+	strcpy(eeconfig->password, "GloriaErikaSeba ");
 	for (int i=0; i<PINS; i++) {
-		eeconfig.outputs[i].mode = DIGITAL;
-		eeconfig.outputs[i].state = LOW;
-		eeconfig.outputs[i].value = 0;
+		eeconfig->outputs[i].mode = DIGITAL;
+		eeconfig->outputs[i].state = LOW;
+		eeconfig->outputs[i].value = 0;
 
-		eeconfig.inputs[i].mode = DIGITAL;
-		eeconfig.inputs[i].state = LOW;
-		eeconfig.inputs[i].value = 0;
-		eeconfig.io_relation[i] = i;
+		eeconfig->inputs[i].mode = DIGITAL;
+		eeconfig->inputs[i].state = LOW;
+		eeconfig->inputs[i].value = 0;
+		eeconfig->io_relation[i] = i;
 	}
 	for (int i=0; i<EMONS; i++) {
-		eeconfig.emon_calib[i] = 20.73;
+		eeconfig->emon_calib[i] = 20.73;
 	}
 }
 
-char first_run() {
+char first_run(Config* eeconfig) {
 	char id[6];
 	char is_first;
 
@@ -60,13 +58,13 @@ char first_run() {
 	if (strcmp(id, start) == 0) {
 		is_first = 0;
 	} else {
-		eeconfig.eeprom_write_counter = 0;
+		eeconfig->eeprom_write_counter = 0;
 		EEPROM.put(0, start);
 	}
 	return is_first;
 }
 
-void store_config() {
+void store_config(Config &eeconfig) {
 	eeconfig.eeprom_write_counter++;
 	eeprom_crc = crc((const char*)&eeconfig, sizeof(eeconfig));
 	EEPROM.put(6, eeprom_crc);

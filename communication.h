@@ -31,8 +31,8 @@ public:
 	Communication();
 	virtual ~Communication();
 
-	byte read();
-	void write(const char *);
+	byte read(const char *);
+	void write(const char *, const char *);
 };
 
 #endif /* COMMUNICATION_H_ */
