@@ -12,15 +12,14 @@ Input::Input() {
 	mode = DIGITAL;
 	state = LOW;
 	value = 0;
-	prev_state = LOW;
+//	prev_state = LOW;
 	prev_input = LOW;
-	toggle = LOW;
-	lastDebounce = millis();
-	debounceDelay = 50; //ms
+//	toggle = LOW;
+//	lastDebounce = millis();
 }
 
 void Input::config(unsigned char pin, unsigned char mode, unsigned char state, unsigned char value) {
-	Input::pin = pin;
+	Input::pin = BASEIN + pin;
 	Input::mode = mode;
 	Input::state = state;
 	Input::value = value;
@@ -30,10 +29,11 @@ int Input::get() {
 	switch (mode) {
 		case DIGITAL: {
 			state = debounceRead();
-			if(state == HIGH && prev_state == LOW) { // Detect rising edge
+//			if(state == HIGH && prev_state == LOW) {
+			if(state == HIGH) {
 				value = !value;
 			}
-			prev_state = state;
+//			prev_state = state;
 			break;
 		}
 		case ANALOG: {
@@ -44,7 +44,7 @@ int Input::get() {
 			} else {
 				state = LOW;
 			}
-			toggle = state;
+//			toggle = state;
 			break;
 		}
 	}
@@ -58,15 +58,22 @@ int Input::get() {
  * \return byte debounced input value
  */
 char Input::debounceRead() {
+	char state = LOW;
 	char input = digitalRead(pin);
 
-	if(input != prev_input) {
-		lastDebounce = millis();
+	if(input == HIGH && prev_input == LOW) { // Detect rising edge
+		lastDebounce = 0;
 	}
-	if((millis() - lastDebounce) > debounceDelay) {
-		if(state != input) {
-			return input;
-		}
+//	if(input != prev_input) {
+//		lastDebounce = millis();
+//	}
+//	if((millis() - lastDebounce) > DEBOUNCEDELAY) {
+//		if(state != input) {
+//			return input;
+//		}
+//	}
+	if(lastDebounce > DEBOUNCEDELAY && input == HIGH) {
+		state = HIGH;
 	}
 	prev_input = input;
 

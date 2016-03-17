@@ -11,8 +11,10 @@
 #include "Arduino.h"
 #include "output.h"
 
+#define BASEIN 14
 #define DIGITAL 0
 #define ANALOG 1
+#define DEBOUNCEDELAY 50 //ms
 
 class Input {
 public:
@@ -32,12 +34,11 @@ public:
 	int get();
 
 private:
-	unsigned long lastDebounce;
-	unsigned long debounceDelay; // ms
-
-	unsigned char prev_state;
+//	unsigned long lastDebounce;
+	unsigned char lastDebounce;
+//	unsigned char prev_state;
 	unsigned char prev_input;
-	unsigned char toggle;
+//	unsigned char toggle;
 	char debounceRead();
 };
 
