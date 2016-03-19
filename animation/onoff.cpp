@@ -7,14 +7,6 @@
 
 #include "onoff.h"
 
-OnOff::OnOff(): Animation() {
-		// TODO Auto-generated constructor stub
-}
-
-OnOff::~OnOff() {
-	// TODO Auto-generated destructor stub
-}
-
 void OnOff::start() {
 	if(out != NULL) {
 		out->value = value;
@@ -26,4 +18,7 @@ void OnOff::stop() {
 	if(out != NULL) {
 		out->reset();
 	}
+}
+
+void OnOff::refresh() {
 }

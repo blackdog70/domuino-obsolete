@@ -10,7 +10,6 @@ int dimmer_step = 0;
 void setup() {
 	Serial.setTimeout(100);
 	Serial.begin(115200);
-
 	pinMode(zero, INPUT);
 	pinMode(13, OUTPUT);
 	attachInterrupt(digitalPinToInterrupt(zero), zero_cross, RISING);

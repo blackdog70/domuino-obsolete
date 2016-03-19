@@ -7,6 +7,7 @@
 
 #include "eeconfig.h"
 
+const char password[] = "GloriaErikaSeba ";
 const char start[] = "Start";
 unsigned short eeprom_crc;
 
@@ -32,7 +33,7 @@ char get_config(Config &eeconfig) {
 
 void firmware_config(Config* eeconfig) {
 	eeconfig->domuino_id = 0;
-	strcpy(eeconfig->password, "GloriaErikaSeba ");
+	strcpy(eeconfig->password, password);
 	for (int i=0; i<PINS; i++) {
 		eeconfig->outputs[i].mode = DIGITAL;
 		eeconfig->outputs[i].state = LOW;
@@ -41,7 +42,12 @@ void firmware_config(Config* eeconfig) {
 		eeconfig->inputs[i].mode = DIGITAL;
 		eeconfig->inputs[i].state = LOW;
 		eeconfig->inputs[i].value = 0;
-		eeconfig->io_relation[i] = i;
+	}
+	for (int i=0; i<MAXSCENERIES; i++) {
+		//TODO: Implement for MAXANIMATIONS not only for position 0
+		eeconfig->scenery[i].animations[0].output = i;
+		eeconfig->scenery[i].animations[0].state = HIGH;
+		eeconfig->scenery[i].animations[0].value = 255;
 	}
 	for (int i=0; i<EMONS; i++) {
 		eeconfig->emon_calib[i] = 20.73;

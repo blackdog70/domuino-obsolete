@@ -13,7 +13,7 @@ Animation::Animation() {
 	value = 0;
 }
 
-Animation::Animation(Output *out, byte state, byte value) {
+Animation::Animation(Output *out, unsigned char state, unsigned char value) {
 	config(out, state, value);
 }
 
@@ -21,7 +21,7 @@ Animation::~Animation() {
 	// TODO Auto-generated destructor stub
 }
 
-void Animation::config(Output *out, byte state, byte value) {
+void Animation::config(Output *out, unsigned char state, unsigned char value) {
 	Animation::out = out;
 	Animation::state = state;
 	Animation::value = value;

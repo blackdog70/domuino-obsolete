@@ -10,6 +10,7 @@
 
 #include "Arduino.h"
 
+#define BASEOUT 4
 #define DIGITAL 0
 #define DIMMABLE 1
 

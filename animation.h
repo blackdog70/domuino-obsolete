@@ -16,17 +16,17 @@
 class Animation {
 public:
 	Output* out;
-	byte state;   	// LOW: OFF HIGH: ON
-	byte value;   	// 0-255: value for dimmable lamp
+	unsigned char state;   	// LOW: OFF HIGH: ON
+	unsigned char value;   	// 0-255: value for dimmable lamp
 
 	Animation();
-	Animation(Output *out, byte state, byte value);
+	Animation(Output*, unsigned char, unsigned char);
 	virtual ~Animation();
-	void config(Output *out, byte state, byte value);
+	void config(Output*, unsigned char, unsigned char);
 	virtual void start() = 0;
 	virtual void stop() = 0;
 	virtual void refresh() = 0;
-	void setValue(byte value);
+	void setValue(unsigned char value);
 
 private:
 };

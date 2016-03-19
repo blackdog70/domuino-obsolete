@@ -12,11 +12,13 @@
 
 class OnOff: public Animation {
 public:
-	OnOff();
-	virtual ~OnOff();
+	OnOff() : Animation() {};
+	OnOff(Output* out, byte state, byte value) : Animation(out, state, value) {};
+//	virtual ~OnOff();
 
-	virtual void start();
-	virtual void stop();
+	void start();
+	void stop();
+	void refresh();
 };
 
 #endif /* ONOFF_H_ */

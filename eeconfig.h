@@ -15,6 +15,19 @@
 //TODO: Put here all the constants
 #define PINS 6
 #define EMONS 2
+#define MAXSCENERIES PINS
+#define MAXANIMATIONS PINS
+
+
+struct Anim {
+	unsigned char output;
+	unsigned char state;
+	unsigned char value;
+};
+
+struct Scen {
+	Anim animations[MAXANIMATIONS];
+};
 
 struct Pin {
 	unsigned char mode;
@@ -22,13 +35,14 @@ struct Pin {
 	unsigned char value;
 };
 
+//TODO: Save scenery to eeprom
 struct Config {
 	long eeprom_write_counter;
 	char domuino_id;
 	char password[BLOCK_SIZE+1];
 	Pin inputs[PINS];
 	Pin outputs[PINS];
-	int io_relation[PINS];
+	Scen scenery[MAXSCENERIES];
 	double emon_calib[EMONS];
 };
 
