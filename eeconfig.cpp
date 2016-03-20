@@ -7,54 +7,75 @@
 
 #include "eeconfig.h"
 
-const char password[] = "GloriaErikaSeba ";
-const char start[] = "Start";
-unsigned short eeprom_crc;
+const char PASSWORD[] = "GloriaErikaSeba ";
+const char start[] = "start\0";
+int eeprom_write_counter;
 
-char get_config(Config &eeconfig) {
+char load_config() {
 	char err = 0;
 
-	if (first_run(&eeconfig)) {
-		firmware_config(&eeconfig);
-		store_config(eeconfig);
+	if (first_run()) {
+		firmware_config();
+		save_config();
 		err = 1;
 	} else {
-		EEPROM.get(6, eeprom_crc);
-		EEPROM.get(6 + sizeof(unsigned short), eeconfig);
+		unsigned long check_crc;
+		unsigned long eeprom_crc;
 
-		if (eeprom_crc != crc((const char*)&eeconfig, sizeof(eeconfig))) {
-			firmware_config(&eeconfig);
-			store_config(eeconfig);
+		EEPROM.get(6, eeprom_crc);
+
+		check_crc = crc((const char*)&input, sizeof(input));
+		check_crc += crc((const char*)&scenery, sizeof(scenery));
+
+		EEPROM.get(6 + sizeof(unsigned long), input);
+		EEPROM.get(6 + sizeof(unsigned long) + sizeof(input), scenery);
+
+
+		if (eeprom_crc != check_crc) {
+			firmware_config();
+			save_config();
 			err = 2;
 		}
 	}
 	return err;
 }
 
-void firmware_config(Config* eeconfig) {
-	eeconfig->domuino_id = 0;
-	strcpy(eeconfig->password, password);
+void firmware_config() {
+	domuino_id = 0;
+	strcpy(password, PASSWORD);
 	for (int i=0; i<PINS; i++) {
-		eeconfig->outputs[i].mode = DIGITAL;
-		eeconfig->outputs[i].state = LOW;
-		eeconfig->outputs[i].value = 0;
-
-		eeconfig->inputs[i].mode = DIGITAL;
-		eeconfig->inputs[i].state = LOW;
-		eeconfig->inputs[i].value = 0;
+		output[i].config(i, DIGITAL, LOW, 0);
+		input[i].config(i, DIGITAL, LOW, 0);
 	}
 	for (int i=0; i<MAXSCENERIES; i++) {
 		//TODO: Implement for MAXANIMATIONS not only for position 0
-		eeconfig->scenery[i].animations[0].output = i;
-		eeconfig->scenery[i].animations[0].state = HIGH;
-		eeconfig->scenery[i].animations[0].value = 255;
+//		for(int j=0; j<MAXANIMATIONS; j++) {
+//			char state = LOW;
+//
+//			if(i==j) {
+//				state = HIGH;
+//			}
+//			scenery[i].animation[j] = new OnOff(&output[j], state, 0);
+//		}
+		scenery[i].animation[0] = new OnOff(&output[i], LOW, 0);
 	}
 	for (int i=0; i<EMONS; i++) {
-		eeconfig->emon_calib[i] = 20.73;
+		emon[i].current((unsigned int) A6+i, 20.73);
 	}
 }
 
-char first_run(Config* eeconfig) {
+void save_config() {
+	unsigned long eeprom_crc;
+
+	eeprom_write_counter++;
+	eeprom_crc = crc((const char*)&input, sizeof(input));
+	eeprom_crc += crc((const char*)&scenery, sizeof(scenery));
+	EEPROM.put(6, eeprom_crc);
+	EEPROM.put(6 + sizeof(unsigned long), input);
+	EEPROM.put(6 + sizeof(unsigned long) + sizeof(input), scenery);
+}
+
+char first_run() {
 	char id[6];
 	char is_first;
 
@@ -64,15 +85,8 @@ char first_run(Config* eeconfig) {
 	if (strcmp(id, start) == 0) {
 		is_first = 0;
 	} else {
-		eeconfig->eeprom_write_counter = 0;
+		eeprom_write_counter = 0;
 		EEPROM.put(0, start);
 	}
 	return is_first;
-}
-
-void store_config(Config &eeconfig) {
-	eeconfig.eeprom_write_counter++;
-	eeprom_crc = crc((const char*)&eeconfig, sizeof(eeconfig));
-	EEPROM.put(6, eeprom_crc);
-	EEPROM.put(6 + sizeof(unsigned short), eeconfig);
 }

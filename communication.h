@@ -10,8 +10,10 @@
 
 #include "Arduino.h"
 #include "crypto.h"
-#include "FreeMemory.h"
-#include "eeconfig.h"
+//#include "FreeMemory.h"
+#include "Time.h"
+//#include "eeconfig.h"
+#include "domuino.h"
 
 #define TERM_CMD '.'
 #define TERM_TOKEN "|"
@@ -27,12 +29,13 @@
 class Communication {
 public:
 	char tokens[MAXTOKENS][SIZETOKENS];
+	char* password;
 
-	Communication();
+	Communication(char *);
 	virtual ~Communication();
 
-	byte read(const char *);
-	void write(const char *, const char *);
+	char read();
+	void send(const char*, const char*, const char*);
 };
 
 #endif /* COMMUNICATION_H_ */

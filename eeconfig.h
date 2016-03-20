@@ -1,4 +1,4 @@
-/*
+/*!
  * eeconfig.h
  *
  *  Created on: Mar 7, 2016
@@ -8,49 +8,34 @@
 #ifndef EECONFIG_H_
 #define EECONFIG_H_
 
-#include "input.h"
+#include "domuino.h"
 #include "crypto.h"
+#include "onoff.h"
 #include "EEPROM.h"
 
 //TODO: Put here all the constants
-#define PINS 6
 #define EMONS 2
-#define MAXSCENERIES PINS
-#define MAXANIMATIONS PINS
 
+extern int eeprom_write_counter;
 
-struct Anim {
-	unsigned char output;
-	unsigned char state;
-	unsigned char value;
-};
+/*!
+ * Check if it is the first time that domuino is started
+ */
+char first_run();
 
-struct Scen {
-	Anim animations[MAXANIMATIONS];
-};
+/*!
+ * Save domuino configuration on eeprom
+ */
+void save_config();
 
-struct Pin {
-	unsigned char mode;
-	unsigned char state;
-	unsigned char value;
-};
+/*!
+ * Init domuino configuration
+ */
+void firmware_config();
 
-//TODO: Save scenery to eeprom
-struct Config {
-	long eeprom_write_counter;
-	char domuino_id;
-	char password[BLOCK_SIZE+1];
-	Pin inputs[PINS];
-	Pin outputs[PINS];
-	Scen scenery[MAXSCENERIES];
-	double emon_calib[EMONS];
-};
-
-extern Config eeconfig;
-
-char first_run(Config*);
-void store_config(Config&);
-void firmware_config(Config*);
-char get_config(Config&);
+/*!
+ * Get domuino configuration from eeprom
+ */
+char load_config();
 
 #endif /* EECONFIG_H_ */

@@ -12,6 +12,7 @@
 #include "output.h"
 
 #define TOGGLE 2
+#define MAXANIMATIONS 6
 
 class Animation {
 public:
