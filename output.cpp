@@ -14,10 +14,9 @@ Output::Output() {
 	Output::value = 0;
 }
 
-void Output::config(unsigned char pin, unsigned char mode, unsigned char state, unsigned char value) {
+void Output::config(unsigned char pin, unsigned char mode, unsigned char value) {
 	Output::pin = BASEOUT + pin;
 	Output::mode = mode;
-	Output::state = state;
 	Output::value = value;
 }
 

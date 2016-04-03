@@ -36,6 +36,7 @@ extern EnergyMonitor emon[];
 extern Scenery scenery[MAXSCENERIES];
 extern Output output[];
 extern Input input[PINS];
+extern char inputsbuffer[PINS];
 
 extern char password[];
 extern char domuino_id;

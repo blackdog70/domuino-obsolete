@@ -44,8 +44,8 @@ void firmware_config() {
 	domuino_id = 0;
 	strcpy(password, PASSWORD);
 	for (int i=0; i<PINS; i++) {
-		output[i].config(i, DIGITAL, LOW, 0);
-		input[i].config(i, DIGITAL, LOW, 0);
+		output[i].config(i, DIGITAL, 255);
+		input[i].config(i, DIGITAL);
 	}
 	for (int i=0; i<MAXSCENERIES; i++) {
 		//TODO: Implement for MAXANIMATIONS not only for position 0

@@ -20,8 +20,6 @@ class Input {
 public:
 	unsigned char pin;
 	unsigned char mode;    	// 0: on/off 1: dimmable
-	unsigned char state;   	// LOW: OFF HIGH: ON
-	unsigned char value;   	// 0-255: value for dimmable lamp
 
 	/*
 	 * Read all inputs and save state.
@@ -30,15 +28,12 @@ public:
 	 * With analog input the state change to ON every time the value is changed, then value is saved.
 	 */
 	Input();
-	void config(unsigned char, unsigned char, unsigned char, unsigned char);
+	void config(unsigned char, unsigned char);
 	int get();
 
 private:
-//	unsigned long lastDebounce;
 	unsigned char lastDebounce;
-//	unsigned char prev_state;
 	unsigned char prev_input;
-//	unsigned char toggle;
 	char debounceRead();
 };
 

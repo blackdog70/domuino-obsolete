@@ -23,7 +23,7 @@ public:
 	unsigned char value;   			// 0-255: value for dimmable lamp
 
 	Output();
-	void config(unsigned char pin, unsigned char mode, unsigned char state, unsigned char value);
+	void config(unsigned char pin, unsigned char mode, unsigned char value);
 	void set();
 	void reset();
 	void setValue(char value);

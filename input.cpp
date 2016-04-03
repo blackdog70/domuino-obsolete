@@ -10,41 +10,25 @@
 Input::Input() {
 	pin = 0;
 	mode = DIGITAL;
-	state = LOW;
-	value = 0;
-//	prev_state = LOW;
-	prev_input = LOW;
-//	toggle = LOW;
-//	lastDebounce = millis();
+	prev_input = 0;
+	lastDebounce = 0;
 }
 
-void Input::config(unsigned char pin, unsigned char mode, unsigned char state, unsigned char value) {
+void Input::config(unsigned char pin, unsigned char mode) {
 	Input::pin = BASEIN + pin;
 	Input::mode = mode;
-	Input::state = state;
-	Input::value = value;
 }
 
 int Input::get() {
+	int value;
+
 	switch (mode) {
 		case DIGITAL: {
-			state = debounceRead();
-//			if(state == HIGH && prev_state == LOW) {
-			if(state == HIGH) {
-				value = !value;
-			}
-//			prev_state = state;
+			value = debounceRead();
 			break;
 		}
 		case ANALOG: {
-			int new_value = analogRead(pin);
-			if(value!=new_value) {
-				state = HIGH;
-				value = new_value;
-			} else {
-				state = LOW;
-			}
-//			toggle = state;
+			value = analogRead(pin);
 			break;
 		}
 	}

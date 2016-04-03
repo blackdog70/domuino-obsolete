@@ -6,6 +6,7 @@ EnergyMonitor emon[EMONS];
 Scenery scenery[MAXSCENERIES];
 Output output[PINS];
 Input input[PINS];
+char inputsbuffer[PINS];
 
 char password[BLOCK_SIZE+1];
 char domuino_id;
@@ -60,6 +61,13 @@ void setup() {
 // the loop function runs over and over again forever
 void loop() {
 	blink_13();
+//TODO: Reset inputsbuffer after a while
+	for(int i=0; i<PINS; i++) {
+		int value = input[i].get();
+		if (value > 0) {
+			inputsbuffer[i] = value;
+		}
+	}
 	execCommand();
 //	delay(2000);
 }
@@ -162,20 +170,10 @@ void execCommand() {
 			unsigned char value = 0;
 
 			for(int i=0; i<PINS; i++) {
-				if(!strcmp(COMMAND+3, "P")) {			//GETP
-					if(!strcmp(COMMAND1, "I")) {
-						value = input[i].state;
-					} else if (!strcmp(COMMAND1, "O")) {
-						value = output[i].state;
-					}
-				} else if (!strcmp(COMMAND+3, "V")) {	//GETV
-					if(!strcmp(COMMAND1, "I")) {
-						value = input[i].value;
-					} else if (!strcmp(COMMAND1, "O")) {
-						value = output[i].value;
-					}
-				} else {
-					break;
+				if(!strcmp(COMMAND1, "I")) {
+					value = inputsbuffer[i];
+				} else if (!strcmp(COMMAND1, "O")) {
+					value = output[i].value;
 				}
 				sprintf(partial, "%3i,", value);
 				strcat(data, partial);
