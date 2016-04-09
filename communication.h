@@ -35,7 +35,7 @@ public:
 	virtual ~Communication();
 
 	char read();
-	void send(const char*, const char*, const char*);
+	void send(const char*);
 };
 
 #endif /* COMMUNICATION_H_ */

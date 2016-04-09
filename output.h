@@ -24,6 +24,7 @@ public:
 
 	Output();
 	void config(unsigned char pin, unsigned char mode, unsigned char value);
+	void toggle();
 	void set();
 	void reset();
 	void setValue(char value);

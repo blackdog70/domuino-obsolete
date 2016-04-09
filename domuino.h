@@ -17,7 +17,7 @@
 #include "errno.h"
 #include "TimerOne.h"
 #include "FreeMemory.h"
-#include "eeconfig.h"
+#include "exec.h"
 
 //end of add your includes here
 #ifdef __cplusplus

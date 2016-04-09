@@ -20,6 +20,11 @@ void Output::config(unsigned char pin, unsigned char mode, unsigned char value) 
 	Output::value = value;
 }
 
+void Output::toggle() {
+	state = 1 - state;
+	digitalWrite(pin, state);
+}
+
 void Output::set() {
 	state = HIGH;
 	digitalWrite(pin, state);

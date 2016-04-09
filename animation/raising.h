@@ -17,9 +17,9 @@ public:
 	virtual ~Raising();
 
 	void config(Output *out, byte state, byte value, unsigned long time);
-	virtual void start();
-	virtual void stop();
-	virtual void refresh();
+	void start();
+	void stop();
+	void refresh();
 
 private:
 	unsigned long start_timer;
