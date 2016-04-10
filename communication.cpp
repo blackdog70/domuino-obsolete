@@ -8,7 +8,7 @@
 #include "communication.h"
 
 //const char msgfmt[] = "{\"T\":%lu,\"C\":\"%s\",\"S\":\"%s\",\"D\":%s}";
-const char msgfmt[] = "%s@%lu";
+const char msgfmt[] = "%lu|%s|"; //| Time | Data
 const char null[] = "null\0";
 
 Communication::Communication(char *password) {
@@ -21,29 +21,27 @@ Communication::~Communication() {
 
 char Communication::read() {
 	char data[BUFFERSIZE];
-	char iv[BLOCK_SIZE + 1];
-	unsigned int buffer_size;
 	char noerr;
-	long crc_value;
 
 	noerr = 0;
 	data[0] = '\0';
-	buffer_size = 0;
-	iv[sizeof(iv) - 1] = 0;
 	memset(tokens, 0, sizeof(tokens));
 	if (Serial.available() > 0) {
 		int data_size = Serial.readBytesUntil(TERM_CMD, data, sizeof(data) - 1);
 		data[data_size] = '\0';
-		crc_value = crc(data, data_size);
-		data_size = Serial.readBytesUntil(ENDLINE, iv, sizeof(iv) -1);
-		iv[data_size] = '\0';
- 		if ((unsigned short)atol(iv) == crc_value) {
-			int tokenId = 0;
-			for(char* token = strtok(data, TERM_TOKEN); token != NULL; token = strtok(NULL, TERM_TOKEN)) {
-				strcpy(tokens[tokenId], token);
-				tokenId++;
+		char *end_crc = strchr(data, '|');
+		if (end_crc != NULL) {
+			char *command = end_crc + 1;
+			long crc_value = crc(command, strlen(command));
+			*(end_crc) = 0;
+			if ((unsigned short)atol(data) == crc_value) {
+				int tokenId = 0;
+				for(char *token = strtok(command, TERM_TOKEN); token != NULL; token = strtok(NULL, TERM_TOKEN)) {
+					strcpy(tokens[tokenId], token);
+					tokenId++;
+				}
+				noerr = 1;
 			}
-			noerr = 1;
 		}
 	}
 
@@ -51,19 +49,16 @@ char Communication::read() {
 }
 
 void Communication::send(const char *data) {
-	char iv[17];
 	char msg[MSGLEN];
 	char *d;
+	char crc_str[7];
 
 	if (strcmp(data, "") == 0)
 		d = (char *)null;
 	else
 		d = (char *)data;
-//	sprintf(msg, msgfmt, (unsigned long)now(), command, status, d);
-	sprintf(msg, msgfmt, d, (unsigned long)now());
-
+	sprintf(msg, msgfmt, (unsigned long)now(), d);
+	ltoa(crc(msg, strlen(msg) - 1), crc_str, 10); // format char | excluded
+	strcat(msg, crc_str);
 	Serial.println(msg);
-	Serial.println(crc(msg, strlen(msg)));
-
-	Serial.flush();
 }

@@ -38,7 +38,7 @@ byte decrypt(char *key, char *crypto, char *text, char *iv, int buffer_size) {
 	return succ;
 }
 
-unsigned short crc(const char *data, size_t size) {
+unsigned long crc(const char *data, size_t size) {
 	unsigned short crc_modbus = 0xffff;
 	const char *d = data;
 
