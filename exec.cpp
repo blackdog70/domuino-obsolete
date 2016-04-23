@@ -31,7 +31,7 @@ void exec_toggle(char *param1) {
 			char param[2] = "O";
 
 			output[id].toggle();
-			exec_get(param);
+			exec_get_pin(param);
 		} else {
 			communication.send(outrange05);
 		}
@@ -83,7 +83,7 @@ void exec_emon(char *param1, char *param2) {
 	if (strcmp(param1, "") && strcmp(param2, "")) {
 		int id = atoi(param1);
 		if ((id >= 0) && (id <= 1)) {
-			int value = atof(param2);
+			float value = atof(param2);
 
 			emon[id].current((unsigned int) A6 + id, (float) value / 100.0);
 			communication.send(ok);
@@ -95,7 +95,7 @@ void exec_emon(char *param1, char *param2) {
 	}
 }
 
-void exec_get(char *param1) {
+void exec_get_pin(char *param1) {
 	if (strcmp(param1, "")) {
 		char data[27] = "[";
 		char partial[5] = "";
@@ -115,6 +115,31 @@ void exec_get(char *param1) {
 			communication.send(data);
 		} else {
 			communication.send(err);
+		}
+	} else {
+		communication.send(err);
+	}
+}
+
+void exec_get_counter(char *param1, char *param2) {
+	if (strcmp(param1, "")) {
+		char data[27] = "";
+
+		int id = atoi(param2);
+		if ((id >= 0) && (id <= 1)) {
+			if (!strcmp(param1, "I")) {
+				sprintf(data, "%lu,", input[id].counter);
+			} else if (!strcmp(param1, "O")) {
+				sprintf(data, "%lu,", output[id].counter);
+			}
+
+			if (strcmp(data, "") != 0) {
+				communication.send(data);
+			} else {
+				communication.send(err);
+			}
+		} else {
+			communication.send(outrange01);
 		}
 	} else {
 		communication.send(err);
@@ -196,13 +221,15 @@ void execCommand() {
 		exec_set(COMMAND + 3, COMMAND1, COMMAND2);
 	} else if(!strncmp(COMMAND, "CONF", 4)) {
 		exec_config(COMMAND + 4, COMMAND1, COMMAND2);
-	} else if(!strncmp(COMMAND, "TOGGLE", 4)) {
+	} else if(!strcmp(COMMAND, "TOGGLE")) {
 		exec_toggle(COMMAND1);
 	} else if(!strncmp(COMMAND, "EMON", 4)) {
 		exec_emon(COMMAND1, COMMAND2);
-	} else if(!strncmp(COMMAND, "GET", 3)) {
-		exec_get(COMMAND1);
-	}  else if (!strcmp(COMMAND, "TIME")) {
+	} else if(!strcmp(COMMAND, "GETP")) {
+		exec_get_pin(COMMAND1);
+	} else if(!strcmp(COMMAND, "GETC")) {
+		exec_get_counter(COMMAND1, COMMAND2);
+	} else if (!strcmp(COMMAND, "TIME")) {
 		exec_time(COMMAND1);
 	} else if (!strcmp(COMMAND, "POWER")) {
 		exec_power();

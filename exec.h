@@ -26,7 +26,7 @@ void exec_init();
 void exec_set(char *type, char *param1, char *param2);
 void exec_toggle(char *param1);
 void exec_emon(char *param1, char *param2);
-void exec_get(char *param1);
+void exec_get_pin(char *param1);
 void exec_scenery(char *type, char *param1);
 void exec_time(char *param1);
 void exec_power();

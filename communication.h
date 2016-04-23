@@ -15,7 +15,7 @@
 //#include "eeconfig.h"
 #include "domuino.h"
 
-#define TERM_CMD '.'
+#define TERM_CMD '#'
 #define TERM_TOKEN "|"
 #define ENDLINE '\n'
 #define MAXTOKENS 3
