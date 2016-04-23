@@ -8,10 +8,11 @@
 #include "output.h"
 
 Output::Output() {
-	Output::pin = 0;
-	Output::mode = DIGITAL;
-	Output::state = LOW;
-	Output::value = 0;
+	pin = 0;
+	mode = DIGITAL;
+	state = LOW;
+	value = 0;
+	counter = 0;
 }
 
 void Output::config(unsigned char pin, unsigned char mode, unsigned char value) {
@@ -21,11 +22,17 @@ void Output::config(unsigned char pin, unsigned char mode, unsigned char value) 
 }
 
 void Output::toggle() {
+	if (state == LOW) {
+		counter++;
+	}
 	state = 1 - state;
 	digitalWrite(pin, state);
 }
 
 void Output::set() {
+	if (state == LOW) {
+		counter++;
+	}
 	state = HIGH;
 	digitalWrite(pin, state);
 }

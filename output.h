@@ -18,9 +18,10 @@
 class Output {
 public:
 	unsigned char pin;
-	unsigned char mode;    			// 0: on/off 1: dimmable
+	unsigned char mode;    	// 0: on/off 1: dimmable
 	unsigned char state;   	// LOW: OFF HIGH: ON
-	unsigned char value;   			// 0-255: value for dimmable lamp
+	unsigned char value;   	// 0-255: value for dimmable lamp
+	unsigned long counter;  // Count number of raising
 
 	Output();
 	void config(unsigned char pin, unsigned char mode, unsigned char value);

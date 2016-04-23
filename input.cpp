@@ -12,6 +12,7 @@ Input::Input() {
 	mode = DIGITAL;
 	prev_input = 0;
 	lastDebounce = 0;
+	counter = 0;
 }
 
 void Input::config(unsigned char pin, unsigned char mode) {
@@ -24,7 +25,11 @@ int Input::get() {
 
 	switch (mode) {
 		case DIGITAL: {
+			int previous = value;
 			value = debounceRead();
+			if (previous == LOW && value == HIGH) {
+				counter++;
+			}
 			break;
 		}
 		case ANALOG: {

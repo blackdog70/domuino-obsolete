@@ -20,6 +20,7 @@ class Input {
 public:
 	unsigned char pin;
 	unsigned char mode;    	// 0: on/off 1: dimmable
+	unsigned long counter;  // Count number of raising
 
 	/*
 	 * Read all inputs and save state.
