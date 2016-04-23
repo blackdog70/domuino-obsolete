@@ -25,10 +25,10 @@ char load_config() {
 		EEPROM.get(6, eeprom_crc);
 
 		check_crc = crc((const char*)&input, sizeof(input));
-		check_crc += crc((const char*)&scenery, sizeof(scenery));
+		check_crc += crc((const char*)&output, sizeof(output));
 
 		EEPROM.get(6 + sizeof(unsigned long), input);
-		EEPROM.get(6 + sizeof(unsigned long) + sizeof(input), scenery);
+		EEPROM.get(6 + sizeof(unsigned long) + sizeof(input), output);
 
 
 		if (eeprom_crc != check_crc) {
@@ -47,18 +47,6 @@ void firmware_config() {
 		output[i].config(i, DIGITAL, 255);
 		input[i].config(i, DIGITAL);
 	}
-	for (int i=0; i<MAXSCENERIES; i++) {
-		//TODO: Implement for MAXANIMATIONS not only for position 0
-//		for(int j=0; j<MAXANIMATIONS; j++) {
-//			char state = LOW;
-//
-//			if(i==j) {
-//				state = HIGH;
-//			}
-//			scenery[i].animation[j] = new OnOff(&output[j], state, 0);
-//		}
-		scenery[i].animation[0] = new OnOff(&output[i], LOW, 0);
-	}
 	for (int i=0; i<EMONS; i++) {
 		emon[i].current((unsigned int) A6+i, 20.73);
 	}
@@ -69,10 +57,10 @@ void save_config() {
 
 	eeprom_write_counter++;
 	eeprom_crc = crc((const char*)&input, sizeof(input));
-	eeprom_crc += crc((const char*)&scenery, sizeof(scenery));
+	eeprom_crc += crc((const char*)&output, sizeof(output));
 	EEPROM.put(6, eeprom_crc);
 	EEPROM.put(6 + sizeof(unsigned long), input);
-	EEPROM.put(6 + sizeof(unsigned long) + sizeof(input), scenery);
+	EEPROM.put(6 + sizeof(unsigned long) + sizeof(input), output);
 }
 
 char first_run() {

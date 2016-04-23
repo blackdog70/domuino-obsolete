@@ -9,12 +9,10 @@
 #define EXEC_H_
 
 #include "output.h"
-#include "scenery.h"
 #include "communication.h"
 #include "eeconfig.h"
 
 extern EnergyMonitor emon[];
-extern Scenery scenery[MAXSCENERIES];
 extern Output output[];
 extern Input input[PINS];
 extern char inputsbuffer[PINS];

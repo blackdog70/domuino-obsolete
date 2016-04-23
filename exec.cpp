@@ -121,27 +121,6 @@ void exec_get(char *param1) {
 	}
 }
 
-void exec_scenery(char *type, char *param1) {
-	if (strcmp(param1, "")) {
-		int id = atoi(param1);
-		if ((id >= 0) && (id <= 5)) {
-			if (!strcmp(type, "ON")) {
-				scenery[id].start();
-				communication.send(ok);
-			} else if (!strcmp(type, "OFF")) {
-				scenery[id].stop();
-				communication.send(ok);
-			} else {
-				communication.send(err);
-			}
-		} else {
-			communication.send(outrange05);
-		}
-	} else {
-		communication.send(err);
-	}
-}
-
 void exec_time(char *param1) {
 	if (strcmp(param1, "")) {
 		const unsigned long DEFAULT_TIME = 1357041600; // Jan 1 2013
@@ -215,8 +194,6 @@ void execCommand() {
 
 	if(!strncmp(COMMAND, "SET", 3)) {
 		exec_set(COMMAND + 3, COMMAND1, COMMAND2);
-	} 	if(!strncmp(COMMAND, "SET", 3)) {
-		exec_set(COMMAND + 3, COMMAND1, COMMAND2);
 	} else if(!strncmp(COMMAND, "CONF", 4)) {
 		exec_config(COMMAND + 4, COMMAND1, COMMAND2);
 	} else if(!strncmp(COMMAND, "TOGGLE", 4)) {
@@ -225,8 +202,6 @@ void execCommand() {
 		exec_emon(COMMAND1, COMMAND2);
 	} else if(!strncmp(COMMAND, "GET", 3)) {
 		exec_get(COMMAND1);
-	} else if(!strncmp(COMMAND, "SC", 2)) {
-		exec_scenery(COMMAND + 2, COMMAND1);
 	}  else if (!strcmp(COMMAND, "TIME")) {
 		exec_time(COMMAND1);
 	} else if (!strcmp(COMMAND, "POWER")) {

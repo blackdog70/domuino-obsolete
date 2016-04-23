@@ -2,7 +2,6 @@
 #include "domuino.h"
 
 EnergyMonitor emon[EMONS];
-Scenery scenery[MAXSCENERIES];
 Output output[PINS];
 Input input[PINS];
 char inputsbuffer[PINS];

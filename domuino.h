@@ -11,7 +11,6 @@
 
 #include "input.h"
 #include "output.h"
-#include "scenery.h"
 #include "communication.h"
 #include "EmonLib.h"
 #include "errno.h"
@@ -33,8 +32,7 @@ void setup();
 
 //add your function definitions for the project domino here
 extern EnergyMonitor emon[];
-extern Scenery scenery[MAXSCENERIES];
-extern Output output[];
+extern Output output[PINS];
 extern Input input[PINS];
 extern char inputsbuffer[PINS];
 
